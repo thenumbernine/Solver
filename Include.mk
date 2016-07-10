@@ -1,0 +1,3 @@
+SOLVERS_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
+INCLUDE+=$(SOLVERS_PATH)include
+DYNAMIC_LIBS+=$(SOLVERS_PATH)dist/$(PLATFORM)/$(BUILD)/libSolvers$(LIB_SUFFIX)
