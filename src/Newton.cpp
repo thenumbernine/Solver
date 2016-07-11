@@ -14,8 +14,8 @@ Newton<real>::Newton(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxi
 , F(F_)
 , lineSearch(&Newton::lineSearch_bisect)
 , maxAlpha(1)
-, lineSearchMaxIter(100)
-, jacobianEpsilon(1e-7)
+, lineSearchMaxIter(20)
+, jacobianEpsilon(1e-6)
 , stopEpsilon(stopEpsilon_)
 , maxiter(maxiter_)
 , dx(new real[n])
@@ -152,7 +152,6 @@ real Newton<real>::lineSearch_bisect() {
 		real alphaMid = .5 * (alphaL + alphaR);
 		real residualMid = residualAtAlpha(alphaMid);
 		if (residualMid > residualL && residualMid > residualR) break;
-		
 		if (residualMid < residualL && residualMid < residualR) {	//better than both?  see which edge has the lead
 			if (residualL <= residualR) {	//<= to prefer sticking closer to the origin in case of equality
 				alphaR = alphaMid;
@@ -189,28 +188,27 @@ void Newton<real>::update() {
 
 //the next step in matching the implicit to the explicit (whose results are good) is making sure the line search is going the correct distance 
 	//update x[n] = x[n] - alpha * dx[n] for some alpha
-	{
-		alpha = (this->*lineSearch)();
+	alpha = (this->*lineSearch)();
 
-		if (!alpha) {
-			//fail code? one will be set in the sim_t calling function at least.
-		} else if (!isfinite(residual)) {
-			//fail code as well?  likewise, one will be set in the caller.
-		} else {
+	if (!alpha) {
+		//fail code? one will be set in the sim_t calling function at least.
+	} else if (!isfinite(residual)) {
+		//fail code as well?  likewise, one will be set in the caller.
+	} else {
 
-			//don't error here -- instead let the outer loop handle this 
-			//if (private->alpha == 0) errorStr("stuck"); 
+		//don't error here -- instead let the outer loop handle this 
+		//if (private->alpha == 0) errorStr("stuck"); 
 
-			//set x[n+1] = x[n] - alpha * dx[n]
-			for (int i = 0; i < n; ++i) {
-				x[i] -= dx[i] * alpha;
-			}
+		//set x[n+1] = x[n] - alpha * dx[n]
+		for (int i = 0; i < n; ++i) {
+			x[i] -= dx[i] * alpha;
 		}
 	}
 }
 
 template<typename real>
 void Newton<real>::solve() {
+	
 	for (int i = 0; i < maxiter; ++i) {
 		update();
 		if (residual < stopEpsilon) break;
