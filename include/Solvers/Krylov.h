@@ -23,6 +23,8 @@ struct Krylov {
 	LinearFunc A;					//linear function
 	LinearFunc MInv;				//optional.  linear function of inverse of the preconditioner.  currently must be able to operate with the input and output the same memory
 
+	std::function<bool()> stopCallback;
+
 	real epsilon;							//optional.  default 1e-10
 	int maxiter;							//optional.  default 'n'
 	

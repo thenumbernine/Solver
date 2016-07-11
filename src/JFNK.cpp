@@ -1,4 +1,4 @@
-#include "Solvers/Newton.h"
+#include "Solvers/JFNK.h"
 #include "Solvers/Vector.h"
 #include <string.h>	//memcpy
 #include <float.h>	//FLT_MAX
@@ -8,11 +8,11 @@
 namespace Solvers {
 
 template<typename real>
-Newton<real>::Newton(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxiter_, real gmresEpsilon, size_t gmresMaxIter, size_t gmresRestart)
+JFNK<real>::JFNK(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxiter_, real gmresEpsilon, size_t gmresMaxIter, size_t gmresRestart)
 : n(n_)
 , x(x_)
 , F(F_)
-, lineSearch(&Newton::lineSearch_bisect)
+, lineSearch(&JFNK::lineSearch_bisect)
 , maxAlpha(1)
 , lineSearchMaxIter(20)
 , jacobianEpsilon(1e-6)
@@ -26,6 +26,7 @@ Newton<real>::Newton(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxi
 , F_of_x_minus_dx(new real[n])
 , residual(0)
 , alpha(0)
+, iter(0)
 //set up the solver for the equation A x = b, solving for x
 , gmres(
 	n,		//n
@@ -44,7 +45,7 @@ Newton<real>::Newton(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxi
 }
 
 template<typename real>
-Newton<real>::~Newton() {
+JFNK<real>::~JFNK() {
 	delete dx;
 	delete F_of_x;
 	delete x_plus_dx;
@@ -55,7 +56,7 @@ Newton<real>::~Newton() {
 
 //solve dF(x[n])/dx[n] x = F(x[n]) for x
 template<typename real>
-void Newton<real>::krylovLinearFunc(real* y, const real* dx) {
+void JFNK<real>::krylovLinearFunc(real* y, const real* dx) {
 #if 0
 	// https://en.wikipedia.org/wiki/Machine_epsilon
 	// machine epsilon for double precision is 2^-53 ~ 1.11e-16
@@ -80,7 +81,7 @@ void Newton<real>::krylovLinearFunc(real* y, const real* dx) {
 	F(F_of_x_minus_dx, x_minus_dx);	//F(x - dx * epsilon)
 
 	/*
-	Knoll, Keyes "Jacobian-Free Newton-Krylov Methods" 2003 
+	Knoll, Keyes "Jacobian-Free JFNK-Krylov Methods" 2003 
 	 shows "(f(x+epsilon v) - f(x)) / epsilon" for first order
 	 and "(f(x+epsilon v) - f(x-epxilon v)) / epsilon" for second order
 	  shouldn't the latter have "2 epsilon" on the bottom?
@@ -98,7 +99,7 @@ void Newton<real>::krylovLinearFunc(real* y, const real* dx) {
 }
 
 template<typename real>
-real Newton<real>::residualAtAlpha(real alpha) {
+real JFNK<real>::residualAtAlpha(real alpha) {
 	
 	//advance by fraction along dx
 	for (int i = 0; i < n; ++i) {
@@ -119,13 +120,13 @@ real Newton<real>::residualAtAlpha(real alpha) {
 }
 
 template<typename real>
-real Newton<real>::lineSearch_none() {
+real JFNK<real>::lineSearch_none() {
 	residual = residualAtAlpha(maxAlpha);
 	return maxAlpha;
 }
 
 template<typename real>
-real Newton<real>::lineSearch_linear() {
+real JFNK<real>::lineSearch_linear() {
 	real alpha = 0;
 	residual = FLT_MAX;
 	
@@ -142,7 +143,7 @@ real Newton<real>::lineSearch_linear() {
 }
 
 template<typename real>
-real Newton<real>::lineSearch_bisect() {
+real JFNK<real>::lineSearch_bisect() {
 	real alphaL = 0;
 	real alphaR = maxAlpha;
 	real residualL = residualAtAlpha(alphaL);
@@ -177,7 +178,7 @@ real Newton<real>::lineSearch_bisect() {
 performs update of iteration x[n+1] = x[n] - ||dF/dx||^-1 F(x[n])
 */
 template<typename real>
-void Newton<real>::update() {	
+void JFNK<real>::update() {	
 
 	//first calc F(x[n])
 	F(F_of_x, x);	
@@ -207,15 +208,16 @@ void Newton<real>::update() {
 }
 
 template<typename real>
-void Newton<real>::solve() {
+void JFNK<real>::solve() {
 	
-	for (int i = 0; i < maxiter; ++i) {
+	for (; iter < maxiter; ++iter) {
 		update();
+		if (stopCallback && stopCallback()) break;
 		if (residual < stopEpsilon) break;
 	}
 }
 
-template struct Newton<float>;
-template struct Newton<double>;
+template struct JFNK<float>;
+template struct JFNK<double>;
 
 }

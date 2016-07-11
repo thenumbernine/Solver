@@ -38,6 +38,7 @@ real Krylov<real>::calcResidual(real rNormL2, real bNormL2, const real* r) {
 
 template<typename real>
 bool Krylov<real>::stop() {
+	if (stopCallback && stopCallback()) return true;
 	if (!isfinite(residual)) return true;
 	if (residual < epsilon) return true;
 	if (iter >= maxiter) return true;

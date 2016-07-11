@@ -12,7 +12,14 @@ struct GMRes : public Krylov<real> {
 
 	typedef typename Super::LinearFunc LinearFunc;
 
-	GMRes(size_t n, real* x, const real* b, LinearFunc A, real epsilon = 1e-7, int maxiter = -1, int restart = -1);
+	GMRes(
+		size_t n,
+		real* x,
+		const real* b,
+		LinearFunc A,
+		real epsilon = 1e-7,
+		int maxiter = -1,
+		int restart = -1);
 	virtual ~GMRes();
 	
 	size_t restart;				//how many iterations to restart.

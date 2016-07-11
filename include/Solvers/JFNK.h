@@ -9,19 +9,27 @@ namespace Solvers {
 x[k+1] = x[k] - (df/dx)^-1 F(x[k])
 */
 template<typename real>
-struct Newton {
+struct JFNK {
 
 	typedef std::function<void(real* y, const real* x)> Func;
 
-	Newton(size_t n, real* x, Func F, double stopEpsilon, int maxiter, real gmresEpsilon, size_t gmresMaxIter, size_t gmresRestart);
-	virtual ~Newton();
+	JFNK(
+		size_t n,
+		real* x,
+		Func F,
+		double stopEpsilon,
+		int maxiter,
+		real gmresEpsilon,
+		size_t gmresMaxIter,
+		size_t gmresRestart);
+	virtual ~JFNK();
 
 	size_t n;
 	
 	//external buffers for the caller to provide
 
 	//current state / at which we are converging about
-	//this is *not* the residual that the Newton minimizes.  That is the private->dx vector.
+	//this is *not* the residual that the JFNK minimizes.  That is the private->dx vector.
 	//size. equal to gmres.krylov.n. I'm keeping it separate for when gmres is disabled.
 	real* x;
 
@@ -48,7 +56,7 @@ struct Newton {
 	real lineSearch_bisect();
 
 	//line search method
-	real (Newton::*lineSearch)();
+	real (JFNK::*lineSearch)();
 
 	//line search scalar
 	real maxAlpha;
@@ -96,7 +104,12 @@ struct Newton {
 	//alpha of best solution along the line search
 	real alpha;
 
+	//current iteration
+	int iter;
+
 	GMRes<real> gmres;
+
+	std::function<bool()> stopCallback;
 };
 
 }
