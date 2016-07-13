@@ -6,7 +6,8 @@
 namespace Solvers {
 
 /*
-x[k+1] = x[k] - (df/dx)^-1 F(x[k])
+source:
+Knoll, Keyes "Jacobian-Free Newton-Krylov Methods" 2003
 */
 template<typename real>
 struct JFNK {

@@ -6,6 +6,10 @@
 
 namespace Solvers {
 
+/*
+source:
+Saad, Schultz (1986). "GMRES: A Generalized Minimal Residual Algorithm for Solving Nonsymmetric Linear Systems." SIAM Journal of Statistical Computations vol. 7 no. 3 July 1986
+*/
 template<typename real>
 struct GMRes : public Krylov<real> {
 	typedef Krylov<real> Super;
