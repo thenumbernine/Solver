@@ -1,7 +1,7 @@
 #include "Solvers/JFNK.h"
 #include "Solvers/Vector.h"
 #include <string.h>	//memcpy
-#include <float.h>	//FLT_MAX
+#include <limits>
 #include <math.h>	//isfinite
 #include <assert.h>
 
@@ -114,7 +114,7 @@ real JFNK<real>::residualAtAlpha(real alpha) {
 	
 	//for comparison's sake, convert nans to flt_max's
 	//this will still fail the isfinite() conditions, *and* it will correctly compare when searching for minimas
-	if (stepResidual != stepResidual) stepResidual = FLT_MAX;
+	if (stepResidual != stepResidual) stepResidual = std::numeric_limits<real>::max();
 
 	return stepResidual;
 }
@@ -128,7 +128,7 @@ real JFNK<real>::lineSearch_none() {
 template<typename real>
 real JFNK<real>::lineSearch_linear() {
 	real alpha = 0;
-	residual = FLT_MAX;
+	residual = std::numeric_limits<real>::max();
 	
 	for (int i = 0; i <= lineSearchMaxIter; ++i) {
 		real stepAlpha = maxAlpha * (real)i / (real)lineSearchMaxIter;
