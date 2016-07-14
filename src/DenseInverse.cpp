@@ -78,7 +78,7 @@ void HouseholderQR<real>::solveLinear_leastSquares(size_t m, size_t n, real* x, 
 		}
 		qtb[i] = sum;
 	}
-	Super::backSubstituteUpperTriangular(m, n, x, r, qtb);
+	this->backSubstituteUpperTriangular(m, n, x, r, qtb);
 }
 
 template<typename real>
@@ -113,7 +113,7 @@ void HouseholderQR<real>::matrixInverse(size_t n, real* ainv, const real* a) {
 			}
 			qty[i] = sum;
 		}
-		Super::backSubstituteUpperTriangular(n, n, ainv + n * j, r, qty);
+		this->backSubstituteUpperTriangular(n, n, ainv + n * j, r, qty);
 	}
 }
 

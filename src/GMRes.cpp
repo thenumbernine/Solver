@@ -91,7 +91,7 @@ http://www.netlib.org/templates/matlab/gmres.m
 */
 template<typename real>
 void GMRes<real>::solve() {
-	size_t n = Super::n;
+	size_t n = this->n;
 	int m = restart;
 
 	memset(v, 0, sizeof(real) * (m + 1) * n);
@@ -100,23 +100,23 @@ void GMRes<real>::solve() {
 	memset(sn, 0, sizeof(real) * m);
 	memset(s, 0, sizeof(real) * (m + 1));
 
-	Super::iter = 0;
+	this->iter = 0;
 
-	real bNormL2 = Vector<real>::normL2(n, Super::b);
+	real bNormL2 = Vector<real>::normL2(n, this->b);
 
 	//r = MInv(b - A(x))
-	Super::A(r, Super::x);
+	this->A(r, this->x);
 	for (int i = 0; i < n; ++i) {
-		r[i] = Super::b[i] - r[i];
+		r[i] = this->b[i] - r[i];
 	}
-	if (Super::MInv) Super::MInv(r, r);
+	if (this->MInv) this->MInv(r, r);
 	real rNormL2 = Vector<real>::normL2(n, r);
 
-	Super::residual = Super::calcResidual(rNormL2, bNormL2, r);
-	if (Super::stop()) {
+	this->residual = this->calcResidual(rNormL2, bNormL2, r);
+	if (this->stop()) {
 	} else {
 		int done = 0;
-		for (Super::iter = 1; Super::iter <= Super::maxiter && !done;) {
+		for (this->iter = 1; this->iter <= this->maxiter && !done;) {
 			//v[0] = r/|r|
 			for (int i = 0; i < n; ++i) {
 				v[i] = r[i] / rNormL2;
@@ -128,10 +128,10 @@ void GMRes<real>::solve() {
 
 			//construct orthonormal basis using Gram-Schmidt
 			int i = 0;
-			for (; i < m; ++i, ++Super::iter) {
+			for (; i < m; ++i, ++this->iter) {
 				//w = MInv(A(v[i]))
-				Super::A(w, v + n * i);
-				if (Super::MInv) Super::MInv(w, w);
+				this->A(w, v + n * i);
+				if (this->MInv) this->MInv(w, w);
 				for (int k = 0; k <= i; ++k) {
 					h[k + (m + 1) * i] = Vector<real>::dot(n, w, v + n * k);
 					//w = w - h[k][i] * v[k]
@@ -178,20 +178,20 @@ void GMRes<real>::solve() {
 #if 0
 				rotate(&h[i+(m+1)*i], &h[i+1+(m+1)*i], cs[i], sn[i]);
 				if (fabs(h[i+1+(m+1)*i]) >= 1e-10) {
-					Super::residualStr("expected %.16f to be within 1e-10", fabs(h[i+1+(m+1)*i]));
+					this->residualStr("expected %.16f to be within 1e-10", fabs(h[i+1+(m+1)*i]));
 				}
 #else
 				h[i+(m+1)*i] = cs[i] * h[i+(m+1)*i] + sn[i] * h[i+1+(m+1)*i];
 				h[i+1+(m+1)*i] = 0;
 #endif
 
-				Super::residual = Super::calcResidual(fabs(s[i+1]), bNormL2, r);
-				if (Super::stop()) {
-					//updateX(Super::x, h, s, v, y, i+1, m, n);
+				this->residual = this->calcResidual(fabs(s[i+1]), bNormL2, r);
+				if (this->stop()) {
+					//updateX(this->x, h, s, v, y, i+1, m, n);
 #if 0
-Super::A(r, Super::x);
-vec_sub(r, Super::b, r);
-if (Super::MInv) Super::MInv(r, r);
+this->A(r, this->x);
+vec_sub(r, this->b, r);
+if (this->MInv) this->MInv(r, r);
 #endif
 					++i;
 					done = 1;
@@ -200,18 +200,18 @@ if (Super::MInv) Super::MInv(r, r);
 			}
 
 			//if (done) break;
-			updateX(m, n, Super::x, h, s, v, y, i);
+			updateX(m, n, this->x, h, s, v, y, i);
 			if (done) break;
 
 			//r = MInv(b - A(x))
-			Super::A(r, Super::x);
+			this->A(r, this->x);
 			for (int k = 0; k < n; ++k) {
-				r[k] = Super::b[k] - r[k];
+				r[k] = this->b[k] - r[k];
 			}
-			if (Super::MInv) Super::MInv(r, r);
+			if (this->MInv) this->MInv(r, r);
 			rNormL2 = Vector<real>::normL2(n, r);
-			Super::residual = Super::calcResidual(rNormL2, bNormL2, r);
-			if (Super::stop()) {
+			this->residual = this->calcResidual(rNormL2, bNormL2, r);
+			if (this->stop()) {
 				break;
 			}
 		}
