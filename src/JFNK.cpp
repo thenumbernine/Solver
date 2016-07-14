@@ -46,12 +46,12 @@ JFNK<real>::JFNK(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxiter_
 
 template<typename real>
 JFNK<real>::~JFNK() {
-	delete dx;
-	delete F_of_x;
-	delete x_plus_dx;
-	delete F_of_x_plus_dx;
-	delete x_minus_dx;
-	delete F_of_x_minus_dx;
+	delete[] dx;
+	delete[] F_of_x;
+	delete[] x_plus_dx;
+	delete[] F_of_x_plus_dx;
+	delete[] x_minus_dx;
+	delete[] F_of_x_minus_dx;
 }
 
 //solve dF(x[n])/dx[n] x = F(x[n]) for x

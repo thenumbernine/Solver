@@ -25,14 +25,14 @@ GMRes<real>::GMRes(size_t n, real* x, const real* b, LinearFunc A, real epsilon,
 
 template<typename real>
 GMRes<real>::~GMRes() {
-	delete w;
-	delete s;
-	delete y;
-	delete sn;
-	delete cs;
-	delete h;
-	delete v;
-	delete r;
+	delete[] w;
+	delete[] s;
+	delete[] y;
+	delete[] sn;
+	delete[] cs;
+	delete[] h;
+	delete[] v;
+	delete[] r;
 }
 
 /*
