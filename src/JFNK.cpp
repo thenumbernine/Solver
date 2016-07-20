@@ -8,7 +8,13 @@
 namespace Solvers {
 
 template<typename real>
-JFNK<real>::JFNK(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxiter_, real gmresEpsilon, size_t gmresMaxIter, size_t gmresRestart)
+JFNK<real>::JFNK(
+	size_t n_,
+	real* x_,
+	Func F_,
+	double stopEpsilon_,
+	int maxiter_,
+	std::function<std::shared_ptr<Krylov<real>>(size_t n, real* F_of_x, real* dx, Func linearFunc)> createLinearSolver)
 : n(n_)
 , x(x_)
 , F(F_)
@@ -27,17 +33,9 @@ JFNK<real>::JFNK(size_t n_, real* x_, Func F_, double stopEpsilon_, int maxiter_
 , residual(0)
 , alpha(0)
 , iter(0)
-//set up the solver for the equation A x = b, solving for x
-, gmres(
-	n,		//n
-	F_of_x,	//b
-	dx,		//x
-	[&](real* y, const real* x) {
-		return this->krylovLinearFunc(y,x); 
-	},		//A
-	gmresEpsilon,	//epsilon
-	gmresMaxIter,		//maxiter
-	gmresRestart)				//restart
+, linearSolver(createLinearSolver(n, F_of_x, dx, [&](real* y, const real* x) {
+	return this->krylovLinearFunc(y,x);
+}))
 {
 	//assume x has the initial content
 	//use x as the initial dx
@@ -185,7 +183,7 @@ void JFNK<real>::update() {
 
 	//solve dF(x[n])/dx[n] dx[n] = F(x[n]) for dx[n]
 	//treating dF(x[n])/dx[n] = I gives us the (working) explicit version
-	gmres.solve();
+	linearSolver->solve();
 
 //the next step in matching the implicit to the explicit (whose results are good) is making sure the line search is going the correct distance 
 	//update x[n] = x[n] - alpha * dx[n] for some alpha

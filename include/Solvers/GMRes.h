@@ -14,22 +14,23 @@ template<typename real>
 struct GMRes : public Krylov<real> {
 	typedef Krylov<real> Super;
 
-	typedef typename Super::LinearFunc LinearFunc;
+	typedef typename Super::Func Func;
 
 	GMRes(
 		size_t n,
 		real* x,
 		const real* b,
-		LinearFunc A,
+		Func A,
 		real epsilon = 1e-7,
 		int maxiter = -1,
 		int restart = -1);
 	virtual ~GMRes();
 	
-	size_t restart;				//how many iterations to restart.
-	
 	virtual void solve();
 
+protected:
+	size_t restart;				//how many iterations to restart.
+	
 	//n = problem size, m = restart
 	real* r;	//[n] residual
 	real* v;	//[n,m+1] linear projection

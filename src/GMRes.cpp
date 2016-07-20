@@ -8,7 +8,7 @@
 namespace Solvers {
 
 template<typename real>
-GMRes<real>::GMRes(size_t n, real* x, const real* b, LinearFunc A, real epsilon, int maxiter, int restart_)
+GMRes<real>::GMRes(size_t n, real* x, const real* b, Func A, real epsilon, int maxiter, int restart_)
 : Super(n, x, b, A, epsilon, maxiter)
 , restart(restart_)
 {

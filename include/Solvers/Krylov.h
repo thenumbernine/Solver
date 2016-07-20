@@ -11,23 +11,27 @@ struct Krylov {
 	accepts x as constant, A as parameter structure
 	stores result in y
 	*/
-	typedef std::function<void(real* y, const real* x)> LinearFunc;
+	typedef std::function<void(real* y, const real* x)> Func;
 	
-	Krylov(size_t n, real* x, const real* b, LinearFunc A, real epsilon_ = 1e-7, int maxiter = -1);
+	Krylov(size_t n, real* x, const real* b, Func A, real epsilon_ = 1e-7, int maxiter = -1);
 	virtual ~Krylov();
 	
+	virtual void solve() = 0;
+
+protected:
 	//user-provided / initially populated
 	size_t n;
 	real* x;								//initial guess
 	const real* b;								//solution
-	LinearFunc A;					//linear function
-	LinearFunc MInv;				//optional.  linear function of inverse of the preconditioner.  currently must be able to operate with the input and output the same memory
+public:
+	Func A;					//linear function
+	Func MInv;				//optional.  linear function of inverse of the preconditioner.  currently must be able to operate with the input and output the same memory
 
 	std::function<bool()> stopCallback;
 
 	real epsilon;							//optional.  default 1e-10
 	int maxiter;							//optional.  default 'n'
-	
+protected:	
 	//member variables
 	int iter;								//current iteration
 	real residual;						//current residual
@@ -45,8 +49,6 @@ struct Krylov {
 	returns false to keep going, true to stop
 	*/
 	virtual bool stop();
-
-	virtual void solve() = 0;
 };
 
 }

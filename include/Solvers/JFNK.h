@@ -8,6 +8,9 @@ namespace Solvers {
 /*
 source:
 Knoll, Keyes "Jacobian-Free Newton-Krylov Methods" 2003
+
+LinearSolver is constructed with the createLinearSolver lambda
+and must have a .solve() routine to solve for a single iteration
 */
 template<typename real>
 struct JFNK {
@@ -20,11 +23,26 @@ struct JFNK {
 		Func F,
 		double stopEpsilon,
 		int maxiter,
-		real gmresEpsilon,
-		size_t gmresMaxIter,
-		size_t gmresRestart);
+		std::function<std::shared_ptr<Krylov<real>>(size_t n, real* b, real* dx, Func)> createLinearSolver
+		= [](size_t n, real* F_of_x, real* dx, Func linearFunc) -> std::shared_ptr<Krylov<real>> {
+			return std::make_shared<GMRes<real>>(n, F_of_x, dx, linearFunc, 1e-20, 10 * n, n);
+		});
 	virtual ~JFNK();
 
+	/*
+	perform a single newton iteration
+	newton = newton structure
+	maxAlpha = scale applied to solved dx update step size
+	lineSearchMaxIter = number of divisions to break maxAlpha * dx into when line searching
+	*/
+	void update();
+
+	/*
+	run all iterations until maxiter is reached or until stopEpsilon is reached
+	*/
+	void solve();
+
+protected:
 	size_t n;
 	
 	//external buffers for the caller to provide
@@ -34,11 +52,14 @@ struct JFNK {
 	//size. equal to gmres.krylov.n. I'm keeping it separate for when gmres is disabled.
 	real* x;
 
+public:
 	//function which we're minimizing wrt
 	Func F;
 
+protected:
 	void krylovLinearFunc(real* y, const real* x);
 
+public:
 	/*
 	don't do any extra searching -- just take the full step
 	*/
@@ -73,17 +94,8 @@ struct JFNK {
 
 	//stop max iter
 	int maxiter;
-	
-	/*
-	perform a single newton iteration
-	newton = newton structure
-	maxAlpha = scale applied to solved dx update step size
-	lineSearchMaxIter = number of divisions to break maxAlpha * dx into when line searching
-	*/
-	void update();
 
-	void solve();
-
+protected:
 	real residualAtAlpha(real alpha);
 	
 	//step to solve (df/du)^-1 * du via GMRes
@@ -108,8 +120,9 @@ struct JFNK {
 	//current iteration
 	int iter;
 
-	GMRes<real> gmres;
+	std::shared_ptr<Krylov<real>> linearSolver;
 
+public:
 	std::function<bool()> stopCallback;
 };
 

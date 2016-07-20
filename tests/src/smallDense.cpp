@@ -39,7 +39,9 @@ void test_small_dense() {
 		y[0] = 0;
 		y[1] = -x[2];
 		y[2] = x[1] - 1;
-	}, 1e-10, 100, 1e-7, 20, 2).solve();
+	}, 1e-10, 100, [&](size_t n, double* x, double* b, Solvers::JFNK<double>::Func linearFunc) -> std::shared_ptr<Solvers::Krylov<double>> {
+		return std::make_shared<Solvers::GMRes<double>>(n, x, b, linearFunc, 1e-7, 20, 2);
+	}).solve();
 	std::cout << "JFNK:" << std::endl;
 	std::cout << x[0] << ", " << x[1] << std::endl;
 }

@@ -11,7 +11,7 @@ n = problem size
 after krylov_init, the caller is still expected to provide x, b, A, and override any other paramters
 */
 template<typename real>
-Krylov<real>::Krylov(size_t n_, real* x_, const real* b_, LinearFunc A_, real epsilon_, int maxiter_)
+Krylov<real>::Krylov(size_t n_, real* x_, const real* b_, Func A_, real epsilon_, int maxiter_)
 : n(n_)
 , x(x_)
 , b(b_)
