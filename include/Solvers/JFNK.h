@@ -110,7 +110,13 @@ protected:
 
 	real* x_minus_dx;
 	real* F_of_x_minus_dx;
-	
+
+public:
+	real getResidual() const { return residual; }
+	real getAlpha() const { return alpha; }
+	int getIter() const { return iter; }
+	std::shared_ptr<Krylov<real>> getLinearSolver() const { return linearSolver; }
+protected:
 	//residual of best solution along the line search
 	real residual;
 

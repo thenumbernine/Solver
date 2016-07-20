@@ -31,6 +31,9 @@ public:
 
 	real epsilon;							//optional.  default 1e-10
 	int maxiter;							//optional.  default 'n'
+
+	int getIter() const { return iter; }
+	real getResidual() const { return residual; }
 protected:	
 	//member variables
 	int iter;								//current iteration
