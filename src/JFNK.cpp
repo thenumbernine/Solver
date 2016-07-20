@@ -97,6 +97,11 @@ void JFNK<real>::krylovLinearFunc(real* y, const real* dx) {
 }
 
 template<typename real>
+real JFNK<real>::calcResidual(const real* x, real alpha) const {
+	return Vector<real>::normL2(n, x) / (real)n;
+}
+
+template<typename real>
 real JFNK<real>::residualAtAlpha(real alpha) {
 	
 	//advance by fraction along dx
@@ -108,7 +113,7 @@ real JFNK<real>::residualAtAlpha(real alpha) {
 	F(F_of_x_plus_dx, x_plus_dx);
 	
 	//divide by n to normalize, so errors remain the same despite vector size
-	real stepResidual = Vector<real>::normL2(n, F_of_x_plus_dx) / (real)n;
+	real stepResidual = calcResidual(F_of_x_plus_dx, alpha);
 	
 	//for comparison's sake, convert nans to flt_max's
 	//this will still fail the isfinite() conditions, *and* it will correctly compare when searching for minimas
@@ -210,6 +215,8 @@ void JFNK<real>::solve() {
 	
 	for (; iter < maxiter; ++iter) {
 		update();
+		if (!alpha) break;
+		if (!isfinite(residual)) break;
 		if (stopCallback && stopCallback()) break;
 		if (residual < stopEpsilon) break;
 	}

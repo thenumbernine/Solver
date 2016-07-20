@@ -96,6 +96,8 @@ public:
 	int maxiter;
 
 protected:
+	virtual real calcResidual(const real* x, real alpha) const;
+	
 	real residualAtAlpha(real alpha);
 	
 	//step to solve (df/du)^-1 * du via GMRes

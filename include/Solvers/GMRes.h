@@ -9,6 +9,9 @@ namespace Solvers {
 /*
 source:
 Saad, Schultz (1986). "GMRES: A Generalized Minimal Residual Algorithm for Solving Nonsymmetric Linear Systems." SIAM Journal of Statistical Computations vol. 7 no. 3 July 1986
+
+note that the MInv inherited from Krylov typically doesn't allow in-place operations,
+but my GMRes always uses MInv for in-place operations (i.e. the output and input vectors are the same)
 */
 template<typename real>
 struct GMRes : public Krylov<real> {
