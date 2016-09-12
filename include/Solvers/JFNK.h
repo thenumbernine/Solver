@@ -2,6 +2,7 @@
 
 #include "Solvers/GMRes.h"
 #include "Solvers/Vector.h"
+#include <memory>
 
 namespace Solvers {
 

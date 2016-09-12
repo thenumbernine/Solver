@@ -9,7 +9,7 @@ template<typename real>
 struct Vector {
 	static real dot(size_t n, const real* a, const real* b) {
 		real s = 0;
-		for (int i = 0; i < n; ++i) {
+		for (int i = 0; i < (int)n; ++i) {
 			s += a[i] * b[i];
 		}
 		return s;

@@ -12,7 +12,7 @@ GMRes<real>::GMRes(size_t n, real* x, const real* b, Func A, real epsilon, int m
 : Super(n, x, b, A, epsilon, maxiter)
 , restart(restart_)
 {
-	if (restart == -1) restart = n;
+	if (restart_ == -1) restart = n;
 	r = new real[n];
 	v = new real[n * (restart + 1)];
 	h = new real[(restart + 1) * restart];
@@ -54,7 +54,7 @@ void GMRes<real>::updateX(size_t m, size_t n, real* x, real* h, real* s, real* v
 	DenseInverse<real>().backSubstituteUpperTriangular(m+1, i, y, h, s);
 	//x = x + v(:, 1:i) * y
 	for (int j = 0; j < i; ++j) {
-		for (int k = 0; k < n; ++k) {
+		for (int k = 0; k < (int)n; ++k) {
 			x[k] += v[k + n * j] * y[j];
 		}
 	}
@@ -106,7 +106,7 @@ void GMRes<real>::solve() {
 
 	//r = MInv(b - A(x))
 	this->A(r, this->x);
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < (int)n; ++i) {
 		r[i] = this->b[i] - r[i];
 	}
 	if (this->MInv) this->MInv(r, r);
@@ -118,7 +118,7 @@ void GMRes<real>::solve() {
 		int done = 0;
 		for (this->iter = 1; this->iter <= this->maxiter && !done;) {
 			//v[0] = r/|r|
-			for (int i = 0; i < n; ++i) {
+			for (int i = 0; i < (int)n; ++i) {
 				v[i] = r[i] / rNormL2;
 			}
 
@@ -135,7 +135,7 @@ void GMRes<real>::solve() {
 				for (int k = 0; k <= i; ++k) {
 					h[k + (m + 1) * i] = Vector<real>::dot(n, w, v + n * k);
 					//w = w - h[k][i] * v[k]
-					for (int l = 0; l < n; ++l) {
+					for (int l = 0; l < (int)n; ++l) {
 						w[l] -= v[l + n * k] * h[k + (m + 1) * i];
 					}
 				}
@@ -148,7 +148,7 @@ void GMRes<real>::solve() {
 				}
 				h[(i+1) + (m+1)*i] = wNormL2;
 				//v[i+1] = w / h[i+1][i] = w/|w|
-				for (int k = 0; k < n; ++k) {
+				for (int k = 0; k < (int)n; ++k) {
 					v[k + n * (i+1)] = w[k] / h[(i+1) + (m+1)*i];
 				}
 				//apply Givens rotation
@@ -205,7 +205,7 @@ if (this->MInv) this->MInv(r, r);
 
 			//r = MInv(b - A(x))
 			this->A(r, this->x);
-			for (int k = 0; k < n; ++k) {
+			for (int k = 0; k < (int)n; ++k) {
 				r[k] = this->b[k] - r[k];
 			}
 			if (this->MInv) this->MInv(r, r);

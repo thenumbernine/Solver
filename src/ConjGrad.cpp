@@ -15,7 +15,7 @@ void ConjGrad<real>::solve() {
 
 	//r = this->b - this->A(this->x)
 	this->A(r, this->x);
-	for (int i = 0; i < this->n; ++i) {
+	for (int i = 0; i < (int)this->n; ++i) {
 		r[i] = this->b[i] - r[i];
 	}
 
@@ -33,7 +33,7 @@ void ConjGrad<real>::solve() {
 			this->A(Ap, p);
 			real alpha = rDotMInvR / Vector<real>::dot(this->n, p, Ap);
 			
-			for (int i = 0; i < this->n; ++i) {
+			for (int i = 0; i < (int)this->n; ++i) {
 				this->x[i] += p[i] * alpha;
 				r[i] -= Ap[i] * alpha;
 			}
@@ -46,7 +46,7 @@ void ConjGrad<real>::solve() {
 			real nRDotMInvR = Vector<real>::dot(this->n, r, MInvR);
 			real beta = nRDotMInvR / rDotMInvR;
 	
-			for (int i = 0; i < this->n; ++i) {
+			for (int i = 0; i < (int)this->n; ++i) {
 				p[i] *= beta;
 				p[i] += MInvR[i];
 			}

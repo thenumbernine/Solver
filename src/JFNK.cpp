@@ -1,7 +1,7 @@
 #include "Solvers/JFNK.h"
 #include "Solvers/Vector.h"
-#include <string.h>	//memcpy
 #include <limits>
+#include <string.h>	//memcpy
 #include <math.h>	//isfinite
 #include <assert.h>
 
@@ -70,7 +70,7 @@ void JFNK<real>::krylovLinearFunc(real* y, const real* dx) {
 	real epsilon = jacobianEpsilon;
 #endif
 
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < (int)n; ++i) {
 		x_plus_dx[i] = x[i] + dx[i] * epsilon;
 		x_minus_dx[i] = x[i] - dx[i] * epsilon;
 	}
@@ -91,7 +91,7 @@ void JFNK<real>::krylovLinearFunc(real* y, const real* dx) {
 	
 	//TODO shouldn't this be divided by epsilon times |dx| ?
 	//(F(x + dx * epsilon) - F(x - dx * epsilon)) / (2 * |dx| * epsilon)
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < (int)n; ++i) {
 		y[i] = (F_of_x_plus_dx[i] - F_of_x_minus_dx[i]) / denom;		//F(x + dx * epsilon) - F(x - dx * epsilon)
 	}
 }
@@ -105,7 +105,7 @@ template<typename real>
 real JFNK<real>::residualAtAlpha(real alpha) {
 	
 	//advance by fraction along dx
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < (int)n; ++i) {
 		x_plus_dx[i] = x[i] - dx[i] * alpha;
 	}
 	
@@ -116,7 +116,7 @@ real JFNK<real>::residualAtAlpha(real alpha) {
 	real stepResidual = calcResidual(F_of_x_plus_dx, alpha);
 	
 	//for comparison's sake, convert nans to flt_max's
-	//this will still fail the isfinite() conditions, *and* it will correctly compare when searching for minimas
+	//this will still fail the std::isfinite() conditions, *and* it will correctly compare when searching for minimas
 	if (stepResidual != stepResidual) stepResidual = std::numeric_limits<real>::max();
 
 	return stepResidual;
@@ -196,7 +196,7 @@ void JFNK<real>::update() {
 
 	if (!alpha) {
 		//fail code? one will be set in the sim_t calling function at least.
-	} else if (!isfinite(residual)) {
+	} else if (!std::isfinite(residual)) {
 		//fail code as well?  likewise, one will be set in the caller.
 	} else {
 
@@ -204,7 +204,7 @@ void JFNK<real>::update() {
 		//if (private->alpha == 0) errorStr("stuck"); 
 
 		//set x[n+1] = x[n] - alpha * dx[n]
-		for (int i = 0; i < n; ++i) {
+		for (int i = 0; i < (int)n; ++i) {
 			x[i] -= dx[i] * alpha;
 		}
 	}
@@ -216,7 +216,7 @@ void JFNK<real>::solve() {
 	for (; iter < maxiter; ++iter) {
 		update();
 		if (!alpha) break;
-		if (!isfinite(residual)) break;
+		if (!std::isfinite(residual)) break;
 		if (stopCallback && stopCallback()) break;
 		if (residual < stopEpsilon) break;
 	}

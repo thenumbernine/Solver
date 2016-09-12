@@ -16,7 +16,7 @@ void ConjRes<real>::solve() {
 
 	//r = this->MInv(this->b - this->A(this->x))
 	this->A(r, this->x);
-	for (int i = 0; i < this->n; ++i) {
+	for (int i = 0; i < (int)this->n; ++i) {
 		r[i] = this->b[i] - r[i];
 	}
 	if (this->MInv) this->MInv(r, r);
@@ -36,7 +36,7 @@ void ConjRes<real>::solve() {
 			if (this->MInv) this->MInv(MInvAp, Ap);
 			real alpha = rAr / Vector<real>::dot(this->n, Ap, MInvAp);
 			
-			for (int i = 0; i < this->n; ++i) {
+			for (int i = 0; i < (int)this->n; ++i) {
 				this->x[i] += p[i] * alpha;
 				r[i] -= MInvAp[i] * alpha;
 			}
@@ -51,7 +51,7 @@ void ConjRes<real>::solve() {
 
 			rAr = nrAr;
 
-			for (int i = 0; i < this->n; ++i) {
+			for (int i = 0; i < (int)this->n; ++i) {
 				p[i] *= beta;
 				p[i] += r[i];
 				Ap[i] *= beta;
