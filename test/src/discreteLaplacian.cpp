@@ -1,4 +1,6 @@
 #include "Solvers/JFNK.h"
+#include <memory.h>
+
 void test_discreteLaplacian() {
 	size_t n = 50;
 	double rho[n * n];
@@ -7,8 +9,8 @@ void test_discreteLaplacian() {
 
 	//phi,xx + phi,yy = rho
 	//solve for phi
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < n; ++j) {
+	for (int i = 0; i < (int)n; ++i) {
+		for (int j = 0; j < (int)n; ++j) {
 			const double r = 15;
 			double dx = (i+.5) - n/2;
 			double dy = (j+.5) - n/2;
@@ -20,13 +22,13 @@ void test_discreteLaplacian() {
 	memcpy(phi, rho, sizeof(phi));
 
 	Solvers::Krylov<double>::Func A = [&](double* y, const double* x) {
-		for (int i = 0; i < n; ++i) {
+		for (int i = 0; i < (int)n; ++i) {
 			int ip = std::min<int>(i+1, n-1);
 			int im = std::max<int>(i-1, 0);
-			for (int j = 0; j < n; ++j) {
+			for (int j = 0; j < (int)n; ++j) {
 				int jp = std::min<int>(j+1, n-1);
 				int jm = std::max<int>(j-1, 0);
-				if (i == 0 || j == 0 || i == n-1 || j == n-1) {
+				if (i == 0 || j == 0 || i == (int)(n-1) || j == (int)(n-1)) {
 					y[i + n * j] = 0;
 				} else if (rho[i + n * j] != 0) {
 					y[i + n * j] = rho[i + n * j];
@@ -52,7 +54,7 @@ void test_discreteLaplacian() {
 		phi,		//initial x
 		[&](double* y, const double* phi) {
 			A(y, phi);
-			for (int i = 0; i < n * n; ++i) {
+			for (int i = 0; i < (int)n * n; ++i) {
 				y[i] -= rho[i];
 			}
 		},			//F(x) to minimize
@@ -81,8 +83,8 @@ void test_discreteLaplacian() {
 	jfnk.solve();
 #endif
 
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < n; ++j) {
+	for (int i = 0; i < (int)n; ++i) {
+		for (int j = 0; j < (int)n; ++j) {
 			printf("%d %d %.16f\n", i, j, phi[i+n*j]);
 		}
 		printf("\n");

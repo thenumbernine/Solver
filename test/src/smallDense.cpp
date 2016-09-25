@@ -21,9 +21,9 @@ void test_small_dense() {
 	x[1] = -1;
 	x[2] = -1;
 	Solvers::GMRes<double>(n, x, b, [&](double *y, const double* x) {
-		for (int i = 0; i < n; ++i) {
+		for (int i = 0; i < (int)n; ++i) {
 			double sum = 0;
-			for (int j = 0; j < n; ++j) {
+			for (int j = 0; j < (int)n; ++j) {
 				sum = sum + a[i+n*j] * x[j];
 			}
 			y[i] = sum;
