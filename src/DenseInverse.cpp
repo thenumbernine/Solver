@@ -3,6 +3,7 @@
 #include <string.h>	//memset
 #include <math.h>
 #include <cassert>
+#include <vector>
 
 namespace Solvers {
 
@@ -35,7 +36,8 @@ template<typename real>
 void HouseholderQR<real>::householderQR(size_t m, size_t n, real* qt, real* a) {
 	assert(m >= n);
 
-	real v[m];
+	std::vector<real> v_(m);
+	real* v = v_.data();
 
 	for (int i = 0; i < (int)m; ++i) {
 		for (int j = 0; j < (int)m; ++j) {
@@ -62,15 +64,18 @@ void HouseholderQR<real>::householderQR(size_t m, size_t n, real* qt, real* a) {
 template<typename real>
 void HouseholderQR<real>::solveLinear_leastSquares(size_t m, size_t n, real* x, const real* a, const real* b) {
 
-	real r[m * n];
+	std::vector<real> r_(m * n);
+	real* r = r_.data();
 	memcpy(r, a, sizeof(real) * m * n);
 	
-	real qt[m * m];
+	std::vector<real> qt_(m * m);
+	real* qt = qt_.data();
 	householderQR(m, n, qt, r);
 
 	//if x == b are matching pointers then I wouldn't be able to write qtb to x without corrupting it
 	//so I'll use an extra buffer to store the intermediate value
-	real qtb[m];
+	std::vector<real> qtb_(m);
+	real* qtb = qtb_.data();
 	for (int i = 0; i < (int)m; ++i) {
 		real sum = 0;
 		for (int j = 0; j < (int)m; ++j) {
@@ -88,13 +93,16 @@ void HouseholderQR<real>::solveLinear(size_t n, real* x, const real* a, const re
 
 template<typename real>
 void HouseholderQR<real>::matrixInverse(size_t n, real* ainv, const real* a) {
-	real r[n * n];
+	std::vector<real> r_(n * n);
+	real* r = r_.data();
 	memcpy(r, a, sizeof(real) * n * n);
 
-	real qt[n * n];
+	std::vector<real> qt_(n * n);
+	real* qt = qt_.data();
 	householderQR(n, n, qt, r);
 		
-	real qty[n];
+	std::vector<real> qty_(n);
+	real* qty = qty_.data();
 
 	for (int i = 0; i < (int)n; ++i) {
 		for (int j = 0; j < (int)n; ++j) {

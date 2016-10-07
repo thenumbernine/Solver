@@ -1,10 +1,18 @@
 #include "Solvers/JFNK.h"
 #include <memory.h>
+#include <vector>
+#include <algorithm>
+
+#ifndef M_PI	//thanks, MSVC
+#define M_PI	3.14159265358979323846264338327950288
+#endif
 
 void test_discreteLaplacian() {
 	size_t n = 50;
-	double rho[n * n];
-	double phi[n * n];
+	std::vector<double> rho_(n * n);
+	double* rho = rho_.data();
+	std::vector<double> phi_(n * n);
+	double* phi = phi_.data();
 	double h2 = 1;
 
 	//phi,xx + phi,yy = rho
