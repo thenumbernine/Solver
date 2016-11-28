@@ -1,3 +1,6 @@
+#include "Solvers/ConjGrad.h"
+#include "Solvers/ConjRes.h"
+#include "Solvers/GMRes.h"
 #include "Solvers/JFNK.h"
 #include <memory.h>
 #include <vector>
@@ -9,10 +12,8 @@
 
 void test_discreteLaplacian() {
 	size_t n = 50;
-	std::vector<double> rho_(n * n);
-	double* rho = rho_.data();
-	std::vector<double> phi_(n * n);
-	double* phi = phi_.data();
+	std::vector<double> rho(n * n);
+	std::vector<double> phi(n * n);
 	double h2 = 1;
 
 	//phi,xx + phi,yy = rho
@@ -25,9 +26,9 @@ void test_discreteLaplacian() {
 			rho[i + n * j] = (fabs(dx) < r && fabs(dy) < r)
 				? ((dx < 0 ? 1 : -1) * (dy < 0 ? 1 : -1))
 				: 0;
+			phi[i + n * j] = rho[i + n * j];
 		}
 	}
-	memcpy(phi, rho, sizeof(phi));
 
 	Solvers::Krylov<double>::Func A = [&](double* y, const double* x) {
 		for (int i = 0; i < (int)n; ++i) {
@@ -36,11 +37,12 @@ void test_discreteLaplacian() {
 			for (int j = 0; j < (int)n; ++j) {
 				int jp = std::min<int>(j+1, n-1);
 				int jm = std::max<int>(j-1, 0);
-				if (i == 0 || j == 0 || i == (int)(n-1) || j == (int)(n-1)) {
-					y[i + n * j] = 0;
-				} else if (rho[i + n * j] != 0) {
-					y[i + n * j] = rho[i + n * j];
-				} else {
+//				if (i == 0 || j == 0 || i == (int)(n-1) || j == (int)(n-1)) {
+//					y[i + n * j] = 0;
+//				} else if (rho[i + n * j] != 0) {
+//					y[i + n * j] = -rho[i + n * j];
+//				} else 
+				{
 					y[i + n * j] =
 						(x[ip + n * j]
 						+ x[im + n * j]
@@ -52,14 +54,29 @@ void test_discreteLaplacian() {
 		}
 	};
 
-#if 1	//works!
-	Solvers::GMRes<double>(n * n, phi, rho, A, 1e-7, n * n * 10, n * n).solve();
+#if 0	//has an error
+	Solvers::ConjGrad<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10);
 #endif
+
+#if 0	//works, but has poor convergence
+	Solvers::ConjRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-20, -1);
+#endif
+
+#if 1	//works!
+	Solvers::GMRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10, n * n);
+#endif
+	
+	solver.stopCallback = [&]()->bool{
+		std::cerr << solver.getResidual() << "\t" << solver.getIter() << std::endl;
+		return false;
+	};
+
+	solver.solve();
 
 #if 0
 	Solvers::JFNK<double> jfnk(
 		n * n,		//n 
-		phi,		//initial x
+		phi.data(),	//initial x
 		[&](double* y, const double* phi) {
 			A(y, phi);
 			for (int i = 0; i < (int)n * n; ++i) {

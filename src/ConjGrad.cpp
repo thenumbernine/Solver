@@ -1,15 +1,20 @@
 #include "Solvers/ConjGrad.h"
 #include "Solvers/Vector.h"
+#include <vector>
 #include <string.h>	//memcpy
 
 namespace Solvers {
 
 template<typename real>
 void ConjGrad<real>::solve() {
-	real* r = new real[this->n];
-	real* p = new real[this->n];
-	real* Ap = new real[this->n];
-	real* MInvR = !this->MInv ? r : new real[this->n];
+	std::vector<real> r_(this->n);
+	real* r = r_.data();
+	std::vector<real> p_(this->n);
+	real* p = p_.data();
+	std::vector<real> Ap_(this->n);
+	real* Ap = Ap_.data();
+	std::vector<real> MInvR_(this->MInv ? this->n : 0);
+	real* MInvR = this->MInv ? MInvR_.data() : r;
 	
 	real bNormL2 = Vector<real>::normL2(this->n, this->b);
 
@@ -18,7 +23,7 @@ void ConjGrad<real>::solve() {
 	for (int i = 0; i < (int)this->n; ++i) {
 		r[i] = this->b[i] - r[i];
 	}
-
+	
 	//MInvR = this->MInv(r)
 	if (this->MInv) this->MInv(MInvR, r);	//else MInvR is already r ...
 	
