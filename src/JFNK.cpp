@@ -33,7 +33,7 @@ JFNK<real>::JFNK(
 , residual(0)
 , alpha(0)
 , iter(0)
-, linearSolver(createLinearSolver(n, F_of_x, dx, [&](real* y, const real* x) {
+, linearSolver(createLinearSolver(n, dx, F_of_x, [&](real* y, const real* x) {
 	return this->krylovLinearFunc(y,x);
 }))
 {
@@ -215,9 +215,9 @@ void JFNK<real>::solve() {
 	
 	for (; iter < maxiter; ++iter) {
 		update();
+		if (stopCallback && stopCallback()) break;
 		if (!alpha) break;
 		if (!std::isfinite(residual)) break;
-		if (stopCallback && stopCallback()) break;
 		if (residual < stopEpsilon) break;
 	}
 }

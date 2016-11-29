@@ -24,9 +24,9 @@ struct JFNK {
 		Func F,
 		double stopEpsilon,
 		int maxiter,
-		std::function<std::shared_ptr<Krylov<real>>(size_t n, real* b, real* dx, Func)> createLinearSolver
+		std::function<std::shared_ptr<Krylov<real>>(size_t n, real* dx, real* b, Func)> createLinearSolver
 		= [](size_t n, real* F_of_x, real* dx, Func linearFunc) -> std::shared_ptr<Krylov<real>> {
-			return std::make_shared<GMRes<real>>(n, F_of_x, dx, linearFunc, 1e-20, 10 * n, n);
+			return std::make_shared<GMRes<real>>(n, dx, F_of_x, linearFunc, 1e-20, 10 * n, n);
 		});
 	virtual ~JFNK();
 

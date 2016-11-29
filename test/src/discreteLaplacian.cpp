@@ -53,8 +53,13 @@ void test_discreteLaplacian() {
 			}
 		}
 	};
+	
+	FILE* solverFile = fopen("solver.txt", "w");
+	fprintf(solverFile, "#iter residual alpha\n");
 
-#if 0	//has an error
+#if 1	//using linear solvers
+
+#if 0	//has a memory access error
 	Solvers::ConjGrad<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10);
 #endif
 
@@ -62,29 +67,35 @@ void test_discreteLaplacian() {
 	Solvers::ConjRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-20, -1);
 #endif
 
-#if 1	//works!
+#if 0	//using gmres with restart proportional to gridsize ... works!
 	Solvers::GMRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10, n * n);
+#endif
+
+#if 1	//using gmres with restart proportional to constant ... works! but slower, of course ... O(exp(x)) instead of O(exp(x^2))
+	Solvers::GMRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10, 10);
 #endif
 	
 	solver.stopCallback = [&]()->bool{
-		std::cerr << solver.getResidual() << "\t" << solver.getIter() << std::endl;
+		fprintf(solverFile, "%d\t%.16f\n", solver.getIter(), solver.getResidual());
 		return false;
 	};
+#endif
 
-	solver.solve();
-
-#if 0
-	Solvers::JFNK<double> jfnk(
+#if 0	//using JFNK nonlinear solver
+	FILE* gmresFile = fopen("gmres.txt", "w");
+	fprintf(gmresFile, "#jfnk_iter gmres_iter residual\n");
+	Solvers::JFNK<double> solver(
 		n * n,		//n 
-		phi.data(),	//initial x
+		phi.data(),	//x
 		[&](double* y, const double* phi) {
 			A(y, phi);
-			for (int i = 0; i < (int)n * n; ++i) {
+			for (int i = 0; i < (int)(n * n); ++i) {
 				y[i] -= rho[i];
+				//y[i] *= y[i];
 			}
 		},			//F(x) to minimize
 		1e-7,		//stop epsilon
-		2, 			//max iter
+		n * n,		//max iter
 		[&](size_t n, double* x, double* b, Solvers::JFNK<double>::Func linearFunc) -> std::shared_ptr<Solvers::Krylov<double>> {
 			return std::make_shared<Solvers::GMRes<double>>(
 				n,			//n
@@ -92,26 +103,40 @@ void test_discreteLaplacian() {
 				b,			//b for A(x) = b
 				linearFunc,	//linearFunc(y,x) <=> y = A(x)
 				1e-7,		//epsilon
-				n * n * 10,	//gmres max iteration
-				n * n);		//restart iteration
+				n * 10,	//gmres max iteration
+				n);		//restart iteration
 		}			//function for creating Krylov linear function
 	);
-	jfnk.lineSearch = &Solvers::JFNK<double>::lineSearch_none;
-	/*jfnk.stopCallback = [&]()->bool{
-		printf("jfnk iter %d alpha %f residual %.16f\n", jfnk.iter, jfnk.alpha, jfnk.residual);
+	solver.lineSearch = &Solvers::JFNK<double>::lineSearch_none;
+	//solver.lineSearch = &Solvers::JFNK<double>::lineSearch_bisect;
+	solver.lineSearchMaxIter = 20;	//250
+	solver.stopCallback = [&]()->bool{
+		fprintf(solverFile, "%d\t%.16f\t%f\n", solver.getIter(), solver.getResidual(), solver.getAlpha());
+		fflush(solverFile);
+		fprintf(gmresFile, "\n");
+		fflush(gmresFile);
 		return false;
-	};*/
-	/*jfnk.gmres.stopCallback = [&]()->bool{
-		printf("gmres iter %d residual %.16f\n", jfnk.gmres.iter, jfnk.gmres.residual);
+	};
+	std::shared_ptr<Solvers::GMRes<double>> gmres = std::dynamic_pointer_cast<Solvers::GMRes<double>>(solver.getLinearSolver());
+	gmres->stopCallback = [&]()->bool{
+		fprintf(gmresFile, "%d\t%d\t%.16f\n", solver.getIter(), gmres->getIter(), gmres->getResidual());
+		fflush(gmresFile);
 		return false;
-	};*/
-	jfnk.solve();
+	};
 #endif
+	
+	solver.solve();
 
+	printf("#x y phi\n");
 	for (int i = 0; i < (int)n; ++i) {
 		for (int j = 0; j < (int)n; ++j) {
 			printf("%d %d %.16f\n", i, j, phi[i+n*j]);
 		}
 		printf("\n");
 	}
+
+	fclose(solverFile);
+#if 0	//if we're using the jfnk
+	fclose(gmresFile);
+#endif
 }
