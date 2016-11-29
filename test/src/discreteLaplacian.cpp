@@ -57,7 +57,7 @@ void test_discreteLaplacian() {
 	FILE* solverFile = fopen("solver.txt", "w");
 	fprintf(solverFile, "#iter residual alpha\n");
 
-#if 1	//using linear solvers
+#if 0	//using linear solvers
 
 #if 0	//has a memory access error
 	Solvers::ConjGrad<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10);
@@ -81,7 +81,7 @@ void test_discreteLaplacian() {
 	};
 #endif
 
-#if 0	//using JFNK nonlinear solver
+#if 1	//using JFNK nonlinear solver
 	FILE* gmresFile = fopen("gmres.txt", "w");
 	fprintf(gmresFile, "#jfnk_iter gmres_iter residual\n");
 	Solvers::JFNK<double> solver(
@@ -136,7 +136,7 @@ void test_discreteLaplacian() {
 	}
 
 	fclose(solverFile);
-#if 0	//if we're using the jfnk
+#if 1	//if we're using the jfnk
 	fclose(gmresFile);
 #endif
 }
