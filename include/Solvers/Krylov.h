@@ -34,6 +34,17 @@ public:
 
 	int getIter() const { return iter; }
 	real getResidual() const { return residual; }
+
+public:
+	typedef enum {
+		NOT_STOPPED,
+		STOP_CALLBACK,
+		STOP_RESIDUAL_NOT_FINITE,
+		STOP_RESIDUAL_WITHIN_EPSILON,
+		STOP_REACHED_MAXITER,
+	} stopReason_t;
+	stopReason_t stopReason;
+
 protected:	
 	//member variables
 	int iter;								//current iteration

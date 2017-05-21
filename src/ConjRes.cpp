@@ -24,9 +24,7 @@ void ConjRes<real>::solve() {
 	real rNormL2 = Vector<real>::normL2(this->n, r);
 	this->residual = this->calcResidual(rNormL2, bNormL2, r);
 
-	do {
-		if (this->stop()) break;
-
+	if (!this->stop()) {
 		this->A(Ar, r);
 		real rAr = Vector<real>::dot(this->n, r, Ar);
 		memcpy(p, r, sizeof(real) * this->n);
@@ -58,7 +56,7 @@ void ConjRes<real>::solve() {
 				Ap[i] += Ar[i];
 			}
 		}
-	} while (0);
+	}
 
 	delete[] r;
 	delete[] p;
