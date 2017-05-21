@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 struct Krylov {

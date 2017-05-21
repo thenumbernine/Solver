@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Solvers/GMRes.h"
-#include "Solvers/Vector.h"
+#include "Solver/GMRES.h"
+#include "Solver/Vector.h"
 #include <memory>
 
-namespace Solvers {
+namespace Solver {
 
 /*
 source:
@@ -24,9 +24,9 @@ struct JFNK {
 		Func F,
 		double stopEpsilon,
 		int maxiter,
-		std::function<std::shared_ptr<Krylov<real>>(size_t n, real* dx, real* b, Func)> createLinearSolver
-		= [](size_t n, real* F_of_x, real* dx, Func linearFunc) -> std::shared_ptr<Krylov<real>> {
-			return std::make_shared<GMRes<real>>(n, dx, F_of_x, linearFunc, 1e-20, 10 * n, n);
+		std::function<std::shared_ptr<Krylov<real>>(size_t n, real* dx, real* F_of_x, Func)> createLinearSolver
+		= [](size_t n, real* dx, real* F_of_x, Func linearFunc) -> std::shared_ptr<Krylov<real>> {
+			return std::make_shared<GMRES<real>>(n, dx, F_of_x, linearFunc, 1e-20, 10 * n, n);
 		});
 	virtual ~JFNK();
 
@@ -101,7 +101,7 @@ protected:
 	
 	real residualAtAlpha(real alpha);
 	
-	//step to solve (df/du)^-1 * du via GMRes
+	//step to solve (df/du)^-1 * du via GMRES
 	real* dx;
 
 	//function value at that point

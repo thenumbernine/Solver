@@ -1,11 +1,11 @@
-#include "Solvers/DenseInverse.h"
-#include "Solvers/Vector.h"
+#include "Solver/DenseInverse.h"
+#include "Solver/Vector.h"
 #include <string.h>	//memset
 #include <math.h>
 #include <cassert>
 #include <vector>
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 void DenseInverse<real>::backSubstituteUpperTriangular(size_t m, size_t n, real* x, const real* a, const real* const b) {

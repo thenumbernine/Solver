@@ -1,11 +1,11 @@
-#include "Solvers/JFNK.h"
-#include "Solvers/Vector.h"
+#include "Solver/JFNK.h"
+#include "Solver/Vector.h"
 #include <limits>
 #include <string.h>	//memcpy
 #include <math.h>	//isfinite
 #include <assert.h>
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 JFNK<real>::JFNK(
@@ -14,7 +14,7 @@ JFNK<real>::JFNK(
 	Func F_,
 	double stopEpsilon_,
 	int maxiter_,
-	std::function<std::shared_ptr<Krylov<real>>(size_t n, real* F_of_x, real* dx, Func linearFunc)> createLinearSolver)
+	std::function<std::shared_ptr<Krylov<real>>(size_t n, real* dx, real* F_of_x, Func linearFunc)> createLinearSolver)
 : n(n_)
 , x(x_)
 , F(F_)
@@ -34,7 +34,7 @@ JFNK<real>::JFNK(
 , alpha(0)
 , iter(0)
 , linearSolver(createLinearSolver(n, dx, F_of_x, [&](real* y, const real* x) {
-	return this->krylovLinearFunc(y,x);
+	return this->krylovLinearFunc(y, x);
 }))
 {
 	//assume x has the initial content

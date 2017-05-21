@@ -3,7 +3,7 @@
 #include <cmath>
 #include <stdlib.h>	//size_t
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 struct Vector {

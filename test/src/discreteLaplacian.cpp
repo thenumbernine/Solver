@@ -1,7 +1,7 @@
-#include "Solvers/ConjGrad.h"
-#include "Solvers/ConjRes.h"
-#include "Solvers/GMRes.h"
-#include "Solvers/JFNK.h"
+#include "Solver/ConjGrad.h"
+#include "Solver/ConjRes.h"
+#include "Solver/GMRES.h"
+#include "Solver/JFNK.h"
 #include <memory.h>
 #include <vector>
 #include <algorithm>
@@ -30,7 +30,7 @@ void test_discreteLaplacian() {
 		}
 	}
 
-	Solvers::Krylov<double>::Func A = [&](double* y, const double* x) {
+	Solver::Krylov<double>::Func A = [&](double* y, const double* x) {
 		for (int i = 0; i < (int)n; ++i) {
 			int ip = std::min<int>(i+1, n-1);
 			int im = std::max<int>(i-1, 0);
@@ -60,19 +60,19 @@ void test_discreteLaplacian() {
 #if 0	//using linear solvers
 
 #if 0	//has a memory access error
-	Solvers::ConjGrad<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10);
+	Solver::ConjGrad<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10);
 #endif
 
 #if 0	//works, but has poor convergence
-	Solvers::ConjRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-20, -1);
+	Solver::ConjRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-20, -1);
 #endif
 
 #if 0	//using gmres with restart proportional to gridsize ... works!
-	Solvers::GMRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10, n * n);
+	Solver::GMRES<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10, n * n);
 #endif
 
 #if 1	//using gmres with restart proportional to constant ... works! but slower, of course ... O(exp(x)) instead of O(exp(x^2))
-	Solvers::GMRes<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10, 10);
+	Solver::GMRES<double> solver(n * n, phi.data(), rho.data(), A, 1e-7, n * n * 10, 10);
 #endif
 	
 	solver.stopCallback = [&]()->bool{
@@ -84,7 +84,7 @@ void test_discreteLaplacian() {
 #if 1	//using JFNK nonlinear solver
 	FILE* gmresFile = fopen("gmres.txt", "w");
 	fprintf(gmresFile, "#jfnk_iter gmres_iter residual\n");
-	Solvers::JFNK<double> solver(
+	Solver::JFNK<double> solver(
 		n * n,		//n 
 		phi.data(),	//x
 		[&](double* y, const double* phi) {
@@ -96,8 +96,8 @@ void test_discreteLaplacian() {
 		},			//F(x) to minimize
 		1e-7,		//stop epsilon
 		n * n,		//max iter
-		[&](size_t n, double* x, double* b, Solvers::JFNK<double>::Func linearFunc) -> std::shared_ptr<Solvers::Krylov<double>> {
-			return std::make_shared<Solvers::GMRes<double>>(
+		[&](size_t n, double* x, double* b, Solver::JFNK<double>::Func linearFunc) -> std::shared_ptr<Solver::Krylov<double>> {
+			return std::make_shared<Solver::GMRES<double>>(
 				n,			//n
 				x,			//initial x
 				b,			//b for A(x) = b
@@ -107,8 +107,8 @@ void test_discreteLaplacian() {
 				n);		//restart iteration
 		}			//function for creating Krylov linear function
 	);
-	solver.lineSearch = &Solvers::JFNK<double>::lineSearch_none;
-	//solver.lineSearch = &Solvers::JFNK<double>::lineSearch_bisect;
+	solver.lineSearch = &Solver::JFNK<double>::lineSearch_none;
+	//solver.lineSearch = &Solver::JFNK<double>::lineSearch_bisect;
 	solver.lineSearchMaxIter = 20;	//250
 	solver.stopCallback = [&]()->bool{
 		fprintf(solverFile, "%d\t%.16f\t%f\n", solver.getIter(), solver.getResidual(), solver.getAlpha());
@@ -117,7 +117,7 @@ void test_discreteLaplacian() {
 		fflush(gmresFile);
 		return false;
 	};
-	std::shared_ptr<Solvers::GMRes<double>> gmres = std::dynamic_pointer_cast<Solvers::GMRes<double>>(solver.getLinearSolver());
+	std::shared_ptr<Solver::GMRES<double>> gmres = std::dynamic_pointer_cast<Solver::GMRES<double>>(solver.getLinearSolver());
 	gmres->stopCallback = [&]()->bool{
 		fprintf(gmresFile, "%d\t%d\t%.16f\n", solver.getIter(), gmres->getIter(), gmres->getResidual());
 		fflush(gmresFile);

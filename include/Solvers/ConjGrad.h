@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Solvers/Krylov.h"
+#include "Solver/Krylov.h"
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 struct ConjGrad : public Krylov<real> {

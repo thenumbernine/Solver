@@ -1,9 +1,9 @@
-#include "Solvers/ConjGrad.h"
-#include "Solvers/Vector.h"
+#include "Solver/ConjGrad.h"
+#include "Solver/Vector.h"
 #include <vector>
 #include <string.h>	//memcpy
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 void ConjGrad<real>::solve() {

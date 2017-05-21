@@ -1,8 +1,8 @@
-#include "Solvers/ConjRes.h"
-#include "Solvers/Vector.h"
+#include "Solver/ConjRes.h"
+#include "Solver/Vector.h"
 #include <string.h>	//memcpy
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 void ConjRes<real>::solve() {

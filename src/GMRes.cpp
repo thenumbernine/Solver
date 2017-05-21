@@ -1,14 +1,14 @@
-#include "Solvers/GMRes.h"
-#include "Solvers/DenseInverse.h"
-#include "Solvers/Vector.h"
+#include "Solver/GMRES.h"
+#include "Solver/DenseInverse.h"
+#include "Solver/Vector.h"
 #include <math.h>
 #include <memory.h>
 #include <assert.h>
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
-GMRes<real>::GMRes(size_t n, real* x, const real* b, Func A, real epsilon, int maxiter, int restart_)
+GMRES<real>::GMRES(size_t n, real* x, const real* b, Func A, real epsilon, int maxiter, int restart_)
 : Super(n, x, b, A, epsilon, maxiter)
 , restart(restart_)
 {
@@ -24,7 +24,7 @@ GMRes<real>::GMRes(size_t n, real* x, const real* b, Func A, real epsilon, int m
 }
 
 template<typename real>
-GMRes<real>::~GMRes() {
+GMRES<real>::~GMRES() {
 	delete[] w;
 	delete[] s;
 	delete[] y;
@@ -49,7 +49,7 @@ m is restart size / h is sized (m+1) * m - m is used for determining h's element
 n is the size of v - used for linear combinations of y and v to adjust x
 */
 template<typename real>
-void GMRes<real>::updateX(size_t m, size_t n, real* x, real* h, real* s, real* v, real* y, int i) {
+void GMRES<real>::updateX(size_t m, size_t n, real* x, real* h, real* s, real* v, real* y, int i) {
 	//y = h(1:i, 1:i) \ s(1:i)
 	DenseInverse<real>().backSubstituteUpperTriangular(m+1, i, y, h, s);
 	//x = x + v(:, 1:i) * y
@@ -61,7 +61,7 @@ void GMRes<real>::updateX(size_t m, size_t n, real* x, real* h, real* s, real* v
 }
 
 template<typename real>
-void GMRes<real>::genrot(real* cs, real* sn, real a, real b) {
+void GMRES<real>::genrot(real* cs, real* sn, real a, real b) {
 	if (b == 0) {
 		*cs = 1;
 		*sn = 0;
@@ -77,7 +77,7 @@ void GMRes<real>::genrot(real* cs, real* sn, real a, real b) {
 }
 
 template<typename real>
-void GMRes<real>::rotate(real* dx, real* dy, real cs, real sn) {
+void GMRES<real>::rotate(real* dx, real* dy, real cs, real sn) {
 	real tmp = cs * *dx + sn * *dy;
 	*dy = -sn * *dx + cs * *dy;
 	*dx = tmp;
@@ -90,7 +90,7 @@ http://www.netlib.org/templates/cpp/gmres.h
 http://www.netlib.org/templates/matlab/gmres.m
 */
 template<typename real>
-void GMRes<real>::solve() {
+void GMRES<real>::solve() {
 	size_t n = this->n;
 	int m = restart;
 
@@ -219,7 +219,7 @@ if (this->MInv) this->MInv(r, r);
 
 }
 
-template struct GMRes<float>;
-template struct GMRes<double>;
+template struct GMRES<float>;
+template struct GMRES<double>;
 
 }

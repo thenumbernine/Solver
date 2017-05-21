@@ -3,7 +3,7 @@
 #include "Common/Exception.h"
 #include <stddef.h>	//size_t
 
-namespace Solvers {
+namespace Solver {
 
 template<typename real>
 struct DenseInverse {

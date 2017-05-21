@@ -1,7 +1,7 @@
-#include "Solvers/Krylov.h"
+#include "Solver/Krylov.h"
 #include <math.h>	//isfinite
 
-namespace Solvers {
+namespace Solver {
 
 /*
 initialized the object with default arguments

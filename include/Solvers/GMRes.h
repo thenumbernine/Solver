@@ -1,25 +1,25 @@
 #pragma once
 
-#include "Solvers/Krylov.h"
-#include "Solvers/DenseInverse.h"	//optional DenseInverse solver parameter
+#include "Solver/Krylov.h"
+#include "Solver/DenseInverse.h"	//optional DenseInverse solver parameter
 #include <stdlib.h>	//size_t
 
-namespace Solvers {
+namespace Solver {
 
 /*
 source:
 Saad, Schultz (1986). "GMRES: A Generalized Minimal Residual Algorithm for Solving Nonsymmetric Linear Systems." SIAM Journal of Statistical Computations vol. 7 no. 3 July 1986
 
 note that the MInv inherited from Krylov typically doesn't allow in-place operations,
-but my GMRes always uses MInv for in-place operations (i.e. the output and input vectors are the same)
+but my GMRES always uses MInv for in-place operations (i.e. the output and input vectors are the same)
 */
 template<typename real>
-struct GMRes : public Krylov<real> {
+struct GMRES : public Krylov<real> {
 	typedef Krylov<real> Super;
 
 	typedef typename Super::Func Func;
 
-	GMRes(
+	GMRES(
 		size_t n,
 		real* x,
 		const real* b,
@@ -27,7 +27,7 @@ struct GMRes : public Krylov<real> {
 		real epsilon = 1e-7,
 		int maxiter = -1,
 		int restart = -1);
-	virtual ~GMRes();
+	virtual ~GMRES();
 	
 	virtual void solve();
 
