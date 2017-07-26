@@ -98,8 +98,9 @@ Krylov<real>::~Krylov() {}
 
 template<typename real>
 real Krylov<real>::calcResidual(real rNormL2, real bNormL2, const real* r) {
+	return rNormL2;
 	//most implementations I see rely on L2 norms
-	return bNormL2 == 0 ? rNormL2 : rNormL2 / bNormL2;
+	//return bNormL2 == 0 ? rNormL2 : rNormL2 / bNormL2;
 	//but an AI trick is that -- with incredibly high dimension space -- the L2 norm fails, and a (weighted) L1 norm works better
 	//return vec_normL1(r, n) / fmax(1., vec_normL1(b, n));
 	//...but I'm getting oob values... even in the case of re-evaluating the L2 norm ...
