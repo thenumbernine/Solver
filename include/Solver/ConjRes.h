@@ -6,7 +6,7 @@ namespace Solver {
 
 template<typename real>
 struct ConjRes : public Krylov<real> {
-	typedef Krylov<real> Super;
+	using Super = Krylov<real>;
 	using Super::Super;
 	virtual void solve();
 };

@@ -16,7 +16,7 @@ and must have a .solve() routine to solve for a single iteration
 template<typename real>
 struct JFNK {
 
-	typedef std::function<void(real* y, const real* x)> Func;
+	using Func = std::function<void(real* y, const real* x)>;
 
 	JFNK(
 		size_t n,

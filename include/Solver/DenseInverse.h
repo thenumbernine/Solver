@@ -35,7 +35,7 @@ struct DenseInverse {
 
 template<typename real>
 struct HouseholderQR : public DenseInverse<real> {
-	typedef DenseInverse<real> Super;
+	using Super = DenseInverse<real>;
 
 	/*
 	helper function for Householder QR

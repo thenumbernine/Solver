@@ -15,9 +15,9 @@ but my GMRES always uses MInv for in-place operations (i.e. the output and input
 */
 template<typename real>
 struct GMRES : public Krylov<real> {
-	typedef Krylov<real> Super;
+	using Super = Krylov<real>;
 
-	typedef typename Super::Func Func;
+	using Func = typename Super::Func;
 
 	GMRES(
 		size_t n,

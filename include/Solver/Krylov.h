@@ -11,7 +11,7 @@ struct Krylov {
 	accepts x as constant, A as parameter structure
 	stores result in y
 	*/
-	typedef std::function<void(real* y, const real* x)> Func;
+	using Func = std::function<void(real* y, const real* x)>;
 	
 	Krylov(size_t n, real* x, const real* b, Func A, real epsilon_ = 1e-7, int maxiter = -1);
 	virtual ~Krylov();
