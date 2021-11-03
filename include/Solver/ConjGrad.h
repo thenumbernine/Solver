@@ -73,8 +73,6 @@ void ConjGrad<real>::solve() {
 			rDotMInvR = nRDotMInvR;
 		}
 	} while (0);
-	
-	if (this->MInv) delete[] MInvR;
 }
 
 }
