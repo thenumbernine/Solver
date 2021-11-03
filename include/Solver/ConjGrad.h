@@ -16,7 +16,7 @@ struct ConjGrad : public Krylov<real> {
 
 #include "Solver/Vector.h"
 #include <vector>
-#include <string.h>	//memcpy
+#include <algorithm>
 
 namespace Solver {
 
@@ -47,7 +47,7 @@ void ConjGrad<real>::solve() {
 	this->residual = this->calcResidual(rNormL2, bNormL2, r);
 	do {
 		if (this->stop()) break;
-		memcpy(p, MInvR, sizeof(real) * this->n);
+		std::copy(MInvR, MInvR + this->n, p);
 		for (this->iter = 1; this->iter <= this->maxiter; ++this->iter) {
 			//alpha = dot(r, this->MInv(r)) / dot(p, this->A(p))
 			this->A(Ap, p);
@@ -74,9 +74,6 @@ void ConjGrad<real>::solve() {
 		}
 	} while (0);
 	
-	delete[] r;
-	delete[] p;
-	delete[] Ap;
 	if (this->MInv) delete[] MInvR;
 }
 
